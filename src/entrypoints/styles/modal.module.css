@@ -1,0 +1,13 @@
+.error-explanation {
+  margin-bottom: 3em;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.note {
+  font-size: 0.9em;
+  color: var(--light-body-color);
+}

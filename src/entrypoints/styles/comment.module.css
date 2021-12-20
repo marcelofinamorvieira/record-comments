@@ -1,0 +1,134 @@
+.comment-main {
+  display: flex;
+  justify-content: space-around;
+}
+
+.author-profile-picture {
+  border-radius: 5px;
+  width: 50px;
+}
+
+.comment__buttons {
+  display: flex;
+  justify-content: left;
+}
+
+.comment__button {
+  background-color: transparent;
+  border: none;
+  color: var(--light-body-color);
+}
+
+.comment__button:hover {
+  cursor: pointer;
+  color: var(--dark-color);
+}
+
+.comment {
+  margin-bottom: 3em;
+}
+
+.reply {
+  margin-bottom: 0;
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1em;
+  flex-grow: 1;
+}
+
+.reply {
+  margin-left: 30px;
+}
+
+.comment-body {
+  flex-grow: 8;
+}
+
+.comment-textarea {
+  background-color: var(--lighter-bg-color);
+  border: solid var(--border-color);
+  resize: none;
+  font: inherit;
+  width: 100%;
+}
+
+.comment-footer {
+  font-size: var(--font-size-s);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.comment__buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  width: 90%;
+}
+
+.comment__timestamps {
+  color: var(--light-body-color);
+  font-size: var(--font-size-xs);
+}
+
+.tip {
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  background: transparent;
+  border: 10px solid var(--light-bg-color);
+}
+
+.tip-down {
+  bottom: -25px;
+  left: 10px;
+  border-right-color: transparent;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.dialogbox .body {
+  position: relative;
+  max-width: 300px;
+  height: auto;
+  padding: 5px;
+  background-color: var(--light-bg-color);
+  border-radius: 3px;
+  border: 5px solid var(--light-bg-color);
+}
+
+.body .message {
+  border-radius: 3px;
+  font-size: var(--font-size-s);
+}
+
+.reply-line {
+  content: "";
+  width: 2px;
+  height: 80px;
+  background: var(--darker-border-color);
+  position: absolute;
+  left: 32px;
+}
+
+.reply-profile-picture-line {
+  content: "";
+  width: 30px;
+  height: 2px;
+  background: var(--darker-border-color);
+  position: absolute;
+  left: 32px;
+  z-index: -1;
+}
+
+.upvoted {
+  color: var(--dark-color);
+}
+
+.comment__interface {
+  color: var(--light-body-color);
+}

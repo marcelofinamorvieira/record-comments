@@ -3,6 +3,7 @@ import styles from "../styles/comment.module.css";
 import Textarea from "react-textarea-autosize";
 import ReactTimeAgo from "react-time-ago";
 import { CommentType } from "../CommentsBar";
+import md5 from "md5";
 import {
   faChevronUp,
   faPen,
@@ -30,7 +31,6 @@ type commentProps = {
 };
 
 const Comment: React.FC<commentProps> = (props) => {
-  //this component is way too big, i should split it into smaller ones
   const userUpvotedThisComment = !!props.commentObject.usersWhoUpvoted.find(
     (userWhoUpvoted) => userWhoUpvoted === props.currentUserEmail
   );
@@ -40,10 +40,9 @@ const Comment: React.FC<commentProps> = (props) => {
   const isNotAReply = "replies" in props.commentObject;
   const userIsAuthor =
     props.commentObject.author.email === props.currentUserEmail;
-  const md5 = require("md5");
   const authorProfilePictureUrl =
     "https://www.gravatar.com/avatar/" +
-    md5(props.commentObject.author.email) +
+    md5(props.commentObject.author.email || '') +
     "?d=mp";
 
   const replyClasses = isNotAReply ? "" : " " + styles.reply;

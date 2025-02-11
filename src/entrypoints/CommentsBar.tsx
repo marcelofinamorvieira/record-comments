@@ -1,12 +1,9 @@
-import { RenderItemFormSidebarPanelCtx } from "datocms-plugin-sdk";
-import {
-  AccountAttributes,
-  UserAttributes,
-} from "datocms-plugin-sdk/dist/types/SiteApiSchema";
-import { Button, Canvas } from "datocms-react-ui";
-import { useEffect, useState } from "react";
-import Comment from "./components/Comment";
-import styles from "./styles/commentbar.module.css";
+import { RenderItemFormSidebarPanelCtx } from 'datocms-plugin-sdk';
+import type { SimpleSchemaTypes } from '@datocms/cma-client-node';
+import { Button, Canvas } from 'datocms-react-ui';
+import { useEffect, useState } from 'react';
+import Comment from './components/Comment';
+import styles from './styles/commentbar.module.css';
 
 type PropTypes = {
   ctx: RenderItemFormSidebarPanelCtx;
@@ -24,21 +21,117 @@ export type CommentType = {
   parentCommentISO?: string;
 };
 
+// Regular DatoCMS user
+type RegularUser = {
+  type: 'user';
+  id: string;
+  attributes: {
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+};
+
+// SSO user from external provider
+type SsoUser = {
+  type: 'sso_user';
+  id: string;
+  attributes: {
+    email: string;
+    name: string;
+  };
+};
+
+// Account user (personal account)
+type Account = {
+  type: 'account';
+  id: string;
+  attributes: {
+    email: string;
+    name: string;
+  };
+};
+
+// Organization user
+type Organization = {
+  type: 'organization';
+  id: string;
+  attributes: {
+    name: string;
+  };
+};
+
+const isRegularUser = (user: any): user is RegularUser => {
+  return (
+    user?.type === 'user' &&
+    'attributes' in user &&
+    'email' in user.attributes &&
+    'full_name' in user.attributes
+  );
+};
+
+const isSsoUser = (user: any): user is SsoUser => {
+  return (
+    user?.type === 'sso_user' &&
+    'attributes' in user &&
+    'email' in user.attributes &&
+    'name' in user.attributes
+  );
+};
+
+const isAccount = (user: any): user is Account => {
+  return (
+    user?.type === 'account' &&
+    'attributes' in user &&
+    'email' in user.attributes &&
+    'name' in user.attributes
+  );
+};
+
+const isOrganization = (user: any): user is Organization => {
+  return (
+    user?.type === 'organization' &&
+    'attributes' in user &&
+    'name' in user.attributes
+  );
+};
+
 const CommentsBar = ({ ctx }: PropTypes) => {
   //this component is way too big, i should split it into smaller ones
-  const userEmail = (ctx.currentUser.attributes as UserAttributes)
-    .email as string;
-  const userName =
-    (ctx.currentUser.attributes as UserAttributes).full_name ||
-    `${(ctx.currentUser.attributes! as AccountAttributes).first_name} ${
-      (ctx.currentUser.attributes as AccountAttributes).last_name
-    }`;
+
+  const getUserEmail = (user: typeof ctx.currentUser): string => {
+    if (isRegularUser(user)) return user.attributes.email;
+    if (isSsoUser(user)) return user.attributes.email;
+    if (isAccount(user)) return user.attributes.email;
+    if (isOrganization(user)) return `organization-access`;
+    return 'unknown@email.com';
+  };
+
+  const getUserName = (user: typeof ctx.currentUser): string => {
+    if (isRegularUser(user)) {
+      return user.attributes.full_name;
+    }
+    if (isSsoUser(user)) {
+      return user.attributes.name;
+    }
+    if (isAccount(user)) {
+      return user.attributes.name;
+    }
+    if (isOrganization(user)) {
+      return user.attributes.name;
+    }
+    const email = getUserEmail(user);
+    return email.split('@')[0];
+  };
+
+  const userEmail = getUserEmail(ctx.currentUser);
+  const userName = getUserName(ctx.currentUser);
   let foundLog = false;
 
   for (const field in ctx.fields) {
     if (
-      ctx.fields[field]?.attributes.field_type === "json" &&
-      "comment_log" === ctx.fields[field]?.attributes.api_key
+      ctx.fields[field]?.attributes.field_type === 'json' &&
+      'comment_log' === ctx.fields[field]?.attributes.api_key
     ) {
       foundLog = true;
       break;
@@ -46,7 +139,7 @@ const CommentsBar = ({ ctx }: PropTypes) => {
   }
 
   if (foundLog) {
-    ctx.disableField("comment_log", true);
+    ctx.disableField('comment_log', true);
   }
 
   const initialState =
@@ -59,12 +152,12 @@ const CommentsBar = ({ ctx }: PropTypes) => {
 
   const handleOpenLogModal = async () => {
     const result = await ctx.openModal({
-      id: "NoLogModal",
+      id: 'NoLogModal',
       title: "Didn't find a log",
-      width: "l",
+      width: 'l',
     });
-    if (result === "goToModelEdit") {
-      ctx.navigateTo(`/admin/item_types/${ctx.itemType.id}`);
+    if (result === 'goToModelEdit') {
+      ctx.navigateTo(`/schema/item_types/${ctx.itemType.id}`);
     }
   };
 
@@ -76,7 +169,7 @@ const CommentsBar = ({ ctx }: PropTypes) => {
 
     const newComment: CommentType = {
       dateISO: new Date().toISOString(),
-      comment: "",
+      comment: '',
       author: {
         name: userName,
         email: userEmail,
@@ -94,7 +187,7 @@ const CommentsBar = ({ ctx }: PropTypes) => {
 
   const deleteCommentHandler = (
     dateISO: string,
-    parentCommentISO: string = ""
+    parentCommentISO: string = ''
   ) => {
     if (parentCommentISO) {
       setSavedComments((oldComments: CommentType[]) => {
@@ -122,7 +215,7 @@ const CommentsBar = ({ ctx }: PropTypes) => {
   const editCommentHandler = (
     dateISO: string,
     newValue: string,
-    parentCommentISO: string = ""
+    parentCommentISO: string = ''
   ) => {
     if (parentCommentISO) {
       setSavedComments((oldComments: CommentType[]) => {
@@ -149,7 +242,7 @@ const CommentsBar = ({ ctx }: PropTypes) => {
   const upvoteCommentHandler = (
     dateISO: string,
     userUpvotedThisComment: boolean,
-    parentCommentISO: string = ""
+    parentCommentISO: string = ''
   ) => {
     if (parentCommentISO) {
       setSavedComments((oldComments: CommentType[]) => {
@@ -193,7 +286,7 @@ const CommentsBar = ({ ctx }: PropTypes) => {
   const replyCommentHandler = (parentCommentISO: string) => {
     const newComment: CommentType = {
       dateISO: new Date().toISOString(),
-      comment: "",
+      comment: '',
       author: {
         name: userName,
         email: userEmail,
@@ -213,13 +306,13 @@ const CommentsBar = ({ ctx }: PropTypes) => {
   useEffect(() => {
     const objectIsEmpty = !Object.keys(savedComments).length;
     if (foundLog && objectIsEmpty) {
-      ctx.setFieldValue("comment_log", null);
+      ctx.setFieldValue('comment_log', null);
     } else if (foundLog) {
       const formatedComments = JSON.stringify(savedComments, null, 2);
       const stateIsEqualToLog =
         formatedComments === (ctx.formValues.comment_log as string);
       if (!stateIsEqualToLog) {
-        ctx.setFieldValue("comment_log", formatedComments);
+        ctx.setFieldValue('comment_log', formatedComments);
       }
     }
   }, [savedComments, ctx, foundLog]);
@@ -228,7 +321,7 @@ const CommentsBar = ({ ctx }: PropTypes) => {
     <Canvas ctx={ctx}>
       <Button
         fullWidth
-        className={styles["add-comment-button"]}
+        className={styles['add-comment-button']}
         onClick={saveCommentHandler}
       >
         Add a new comment...
